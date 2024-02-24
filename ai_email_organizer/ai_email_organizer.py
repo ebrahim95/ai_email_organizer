@@ -41,16 +41,22 @@ def email():
     try:
         # Call the Gmail API
         service = build("gmail", "v1", credentials=creds)
-        results = service.users().labels().list(userId="me").execute()
-        labels = results.get("labels", [])
+        message_list = service.users().messages().list(userId="me").execute()
+        messages = message_list.get("messages", [])
 
-        if not labels:
-            print("No labels found.")
+        if not messages:
+            print("No messages found.")
             return
-        print("Labels:")
-        for label in labels:
-            print(label["name"])
+        print("Messages:")
+        message_ = (
+            service.users().messages().get(userId="me", id="18da49c7802d50ea").execute()
+        )
+        print(message_)
 
+        # for message in message_list["messages"]:
+        #     print(
+        #         service.users().messages().get("ebrahim.akh95@gmail.com", message["id"])
+        #     )
     except HttpError as error:
         # TODO(developer) - Handle errors from gmail API.
         print(f"An error occurred: {error}")
