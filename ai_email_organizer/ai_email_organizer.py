@@ -48,15 +48,13 @@ def email():
             print("No messages found.")
             return
         print("Messages:")
-        message_ = (
-            service.users().messages().get(userId="me", id="18da49c7802d50ea").execute()
-        )
-        print(message_)
+        for message in messages:
+            return_message_snippet = (
+                service.users().messages().get(userId="me", id=message["id"]).execute()
+            )
+            print(return_message_snippet["snippet"])
+            print(return_message_snippet["payload"]["body"].get("data", 0))
 
-        # for message in message_list["messages"]:
-        #     print(
-        #         service.users().messages().get("ebrahim.akh95@gmail.com", message["id"])
-        #     )
     except HttpError as error:
         # TODO(developer) - Handle errors from gmail API.
         print(f"An error occurred: {error}")
