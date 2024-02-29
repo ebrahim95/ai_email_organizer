@@ -1,1 +1,1 @@
-from .gmail_api import gmail_api
+from .gmail_api import email 
