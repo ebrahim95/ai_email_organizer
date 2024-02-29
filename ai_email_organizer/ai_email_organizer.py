@@ -1,7 +1,7 @@
 """Welcome to Reflex! This file outlines the steps to create a basic app."""
 from rxconfig import config
 import reflex as rx
-import email
+from .components import gmail_api
 
 docs_url = "https://reflex.dev/docs/getting-started/introduction"
 
@@ -13,14 +13,14 @@ class State(rx.State):
 
 
 def index() -> rx.Component:
-    email()
+    gmail_api.email()
     return rx.center(
         rx.theme_panel(),
         rx.vstack(
-            rx.heading("Welcome to Reflex!", size="9"),
+            rx.heading("Welcome to Gmail AI Organizer!", size="9"),
             rx.text("Get started by editing ", rx.code(filename)),
             rx.button(
-                "Check out our docs!",
+                "Login",
                 on_click=lambda: rx.redirect(docs_url),
                 size="4",
             ),
