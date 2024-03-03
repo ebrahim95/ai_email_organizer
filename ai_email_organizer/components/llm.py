@@ -4,7 +4,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-
+from ..state.gmail_api import gmail_message
 
 # make i do a chain selection
 output_parser = StrOutputParser()
@@ -27,6 +27,6 @@ chain.invoke(
 
 embeddings = OllamaEmbeddings()
 text_splitter = RecursiveCharacterTextSplitter()
-gmail_data = ""
+gmail_data = gmail_message.message_list 
 gmail_split = text_splitter.split_documents(gmail_data)
 vector = FAISS.from_documents(gmail_split, embeddings)
