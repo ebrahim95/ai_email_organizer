@@ -6,6 +6,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from ..state.gmail_api import gmail_message
+from bs4 import BeautifulSoup
+from pprint import pprint
 
 
 # If modifying these scopes, delete the file token.json.
@@ -37,6 +39,9 @@ def email():
         # Call the Gmail API
         service = build("gmail", "v1", credentials=creds)
         message_list = service.users().messages().list(userId="me").execute()
+        message_list = (
+            service.users().messages().list(userId="me", maxResults="10").execute()
+        )
         messages = message_list.get("messages", [])
 
         if not messages:
@@ -51,7 +56,32 @@ def email():
             encoded_text = return_message_snippet["payload"]["body"].get("data", 0)
             if encoded_text == "0":
                 print(base64.b64decode(encoded_text).decode("utf-8"))
+            payload = return_message_snippet["payload"]
+            headers = payload["headers"]
+            parts = payload.get("parts", 0)
+            data = parts[0]["body"].get("data", 0) if parts != 0 else 0
 
+            pprint(payload, depth=1)
+            print("\n")
+            print(
+                "----------------------------------------------------------------------------------"
+            )
+            print("\n")
+            for who in headers:
+                if who["name"] == "Subject":
+                    subject = who["value"]
+                if who["name"] == "From":
+                    sender = who["value"]
+
+            if data != 0:
+                decoded = base64.urlsafe_b64decode(data.encode("utf-8")).decode("utf-8")
+                # print("From", sender)
+                # print("Subject", subject)
+                # print(BeautifulSoup(decoded, "lxml"))
+                # print(
+                #     "----------------------------------------------------------------------------------"
+                # )
+        print(gmail_message.message_list)
     except HttpError as error:
         # TODO(developer) - Handle errors from gmail API.
         print(f"An error occurred: {error}")
