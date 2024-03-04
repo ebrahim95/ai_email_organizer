@@ -15,9 +15,6 @@ SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 
 def email():
-    """Shows basic usage of the Gmail API.
-    Lists the user's Gmail labels.
-    """
     creds = None
     # The file token.json stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -38,7 +35,6 @@ def email():
     try:
         # Call the Gmail API
         service = build("gmail", "v1", credentials=creds)
-        message_list = service.users().messages().list(userId="me").execute()
         message_list = (
             service.users().messages().list(userId="me", maxResults="10").execute()
         )
@@ -52,10 +48,6 @@ def email():
             return_message_snippet = (
                 service.users().messages().get(userId="me", id=message["id"]).execute()
             )
-            print(return_message_snippet["snippet"])
-            encoded_text = return_message_snippet["payload"]["body"].get("data", 0)
-            if encoded_text == "0":
-                print(base64.b64decode(encoded_text).decode("utf-8"))
             payload = return_message_snippet["payload"]
             headers = payload["headers"]
             parts = payload.get("parts", 0)
