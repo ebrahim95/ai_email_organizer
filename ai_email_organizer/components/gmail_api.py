@@ -72,15 +72,6 @@ def email():
             return_message_snippet = (
                 service.users().messages().get(userId="me", id=message["id"]).execute()
             )
-            """ alternative way to get message"""
-            # get body message from the email
-            # encoded_text = return_message_snippet["payload"]["body"].get("data", 0)
-            # print(encoded_text)
-            # if encoded_text != 0:
-            #     text = base64.urlsafe_b64decode(encoded_text.encode("utf-8")).decode(
-            #         "utf-8"
-            #     )
-            #     gmail_message.store_message(text)
             payload = return_message_snippet["payload"]
             headers = payload["headers"]
             parts = payload.get("parts", 0)
