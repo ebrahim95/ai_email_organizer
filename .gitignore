@@ -6,3 +6,5 @@ credentials.json
 token.json
 .venv/
 /.venv
+*.venv
+.venv
