@@ -4,9 +4,9 @@ from rxconfig import config
 import reflex as rx
 from .components import gmail_api
 from .state.gmail_api import State
+from .components import llm
 
 docs_url = "https://reflex.dev/docs/getting-started/introduction"
-
 filename = f"{config.app_name}/{config.app_name}.py"
 
 
@@ -20,7 +20,7 @@ def login_button() -> rx.Component:
 
 def index() -> rx.Component:
     gmail_api.email()
-
+    llm.llm()
     return rx.center(
         # rx.theme_panel(),
         rx.vstack(
