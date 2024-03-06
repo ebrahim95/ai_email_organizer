@@ -1,10 +1,10 @@
 *.db
 *.py[cod]
+*.venv
+.venv
+.venv/
 .web
+/.venv
 __pycache__/
 credentials.json
 token.json
-.venv/
-/.venv
-*.venv
-.venv
