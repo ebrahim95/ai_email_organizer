@@ -21,18 +21,20 @@ def llm():
 
     Question: {input}""")
 
-    llm = Ollama(model="phi")
+    llm = Ollama(model="qwen:0.5b")
     document_chain = create_stuff_documents_chain(llm, prompt)
 
     gmail_data = email()
-    embeddings = OllamaEmbeddings()
+    embeddings = OllamaEmbeddings(model="qwen:0.5b")
     text_splitter = RecursiveCharacterTextSplitter()
-    documents = text_splitter.create_documents(gmail_data[0])
+    documents = text_splitter.create_documents(gmail_data)
     gmail_split = text_splitter.split_documents(documents)
     vector = FAISS.from_documents(gmail_split, embeddings)
 
     retriever = vector.as_retriever()
     retrieval_chain = create_retrieval_chain(retriever, document_chain)
 
-    response = retrieval_chain.invoke({"input": "Summarize the emails"})
+    response = retrieval_chain.invoke(
+        {"input": "Find the themes of these emails and tell me the themes."}
+    )
     print(response["answer"])
