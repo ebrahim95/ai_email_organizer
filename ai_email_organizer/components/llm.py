@@ -9,7 +9,7 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from .gmail_api import email
 
 
-def llm():
+def llm(data):
     # helps to convert output into string
     output_parser = StrOutputParser()
 
@@ -24,7 +24,7 @@ def llm():
     llm = Ollama(model="qwen:0.5b")
     document_chain = create_stuff_documents_chain(llm, prompt)
 
-    gmail_data = email()
+    gmail_data = data
     embeddings = OllamaEmbeddings(model="qwen:0.5b")
     text_splitter = RecursiveCharacterTextSplitter()
     documents = text_splitter.create_documents(gmail_data)

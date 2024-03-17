@@ -17,8 +17,9 @@ def login_button() -> rx.Component:
 
 
 def index() -> rx.Component:
-    gmail_api.email()
-    llm.llm()
+    State.login()
+    data = gmail_api.email(State.creds)
+    llm.llm(data)
     return rx.center(
         # rx.theme_panel(),
         rx.vstack(
