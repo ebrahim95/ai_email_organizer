@@ -16,14 +16,30 @@ from bs4 import BeautifulSoup
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 
-def email(creds):
+def email(creds=""):
+    # The file token.json stores the user's access and refresh tokens, and is
+    # created automatically when the authorization flow completes for the first
+    # time.
+    if os.path.exists("token.json"):
+        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    # If there are no (valid) credentials available, let the user log in.
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+            creds = flow.run_local_server(port=50000)
+        # Save the credentials for the next run
+        with open("token.json", "w") as token:
+            token.write(creds.to_json())
+
     message_list_append: list[list[str, str, str]] = []
     message_list_string: str = ""
     try:
         # Call the Gmail API
         service = build("gmail", "v1", credentials=creds)
         message_list = (
-            service.users().messages().list(userId="me", maxResults="2").execute()
+            service.users().messages().list(userId="me", maxResults="3").execute()
         )
         messages = message_list.get("messages", [])
 
@@ -80,11 +96,13 @@ def email(creds):
                 # delete *-
                 result = re.sub(r"[*-]", " ", result)
 
-                message_list_append.append(who)
-                message_list_append.append(subject)
-                message_list_append.append("message: " + result)
+                # message_list_append.append(who)
+                # message_list_append.append(subject)
+                # message_list_append.append("message: " + result)
                 message_list_string += who + subject + "message: " + result
-        return message_list_string
+                message_list_append.append(message_list_string)
+        print(message_list_append)
+        return message_list_append
 
     except HttpError as error:
         # TODO(developer) - Handle errors from gmail API.
