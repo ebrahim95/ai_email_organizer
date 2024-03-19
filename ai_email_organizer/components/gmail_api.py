@@ -1,84 +1,40 @@
 import reflex as rx
-import base64
-import os.path
-import re
-import email as femail
 from pprint import pprint
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from bs4 import BeautifulSoup
+from simplegmail import Gmail
+from simplegmail.query import construct_query
 
+
+gmail = Gmail()
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 
 def email(creds=""):
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-    if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
-            creds = flow.run_local_server(port=50000)
-        # Save the credentials for the next run
-        with open("token.json", "w") as token:
-            token.write(creds.to_json())
-
+    gmail = Gmail()
     message_list_append: list[list[str, str, str]] = []
     message_list_string: str = ""
     try:
-        # Call the Gmail API
-        service = build("gmail", "v1", credentials=creds)
-        message_list = (
-            service.users().messages().list(userId="me", maxResults="3").execute()
-        )
-        messages = message_list.get("messages", [])
+        # Unread messages in your inbox
+        query_params = {
+            "newer_than": (2, "day"),
+        }
+        messages = gmail.get_messages(query=construct_query(query_params))
 
-        if not messages:
-            print("No messages found.")
-            return
-
-        print("Messages:")
+        # Print them out!
         for message in messages:
-            message = (
-                service.users()
-                .messages()
-                .get(userId="me", id=message["id"], format="raw")
-                .execute()
-            )
+            message_list_string += "To: " + message.recipient
+            message_list_string += "From: " + message.sender
+            message_list_string += "Subject: " + message.subject
+            message_list_string += "Date: " + message.date
+            message_list_string += "Preview: " + message.snippet
 
-            # Parse the raw message.
-            mime_msg = femail.message_from_bytes(
-                base64.urlsafe_b64decode(message["raw"])
-            )
+            if message.plain is not None:
+                message_list_string += (
+                    "Message Body: " + message.plain
+                )  # or message.html
 
-            print(mime_msg["from"])
-            print(mime_msg["to"])
-            print(mime_msg["subject"])
-
-            print("----------------------------------------------------")
-            # Find full message body
-            message_main_type = mime_msg.get_content_maintype()
-            if message_main_type == "multipart":
-                for part in mime_msg.get_payload():
-                    if part.get_content_maintype() == "text":
-                        print(BeautifulSoup(part.get_payload()).get_text())
-            elif message_main_type == "text":
-                print(BeautifulSoup(mime_msg.get_payload()).get_text())
-            print("----------------------------------------------------")
-
-            # Message snippet only.
-            # print('Message snippet: %s' % message['snippet'])
-            print(message_list_append)
         return message_list_append
 
     except HttpError as error:
