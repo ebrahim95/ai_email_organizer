@@ -49,59 +49,36 @@ def email(creds=""):
 
         print("Messages:")
         for message in messages:
-            return_message_snippet = (
-                service.users().messages().get(userId="me", id=message["id"]).execute()
+            message = (
+                service.users()
+                .messages()
+                .get(userId="me", id=message["id"], format="raw")
+                .execute()
             )
 
-            payload = return_message_snippet["payload"]
-            headers = payload["headers"]
-            parts = payload.get("parts", 0)
-            data = parts[0]["body"].get("data", 0) if parts != 0 else 0
+            # Parse the raw message.
+            mime_msg = femail.message_from_bytes(
+                base64.urlsafe_b64decode(message["raw"])
+            )
 
-            # pprint(payload, depth=1)
-            # print("\n")
-            # print(
-            #     "----------------------------------------------------------------------------------"
-            # )
-            # print("\n")
+            print(mime_msg["from"])
+            print(mime_msg["to"])
+            print(mime_msg["subject"])
 
-            for who in headers:
-                if who["name"] == "Subject":
-                    subject = who["value"]
-                if who["name"] == "From":
-                    sender = who["value"]
+            print("----------------------------------------------------")
+            # Find full message body
+            message_main_type = mime_msg.get_content_maintype()
+            if message_main_type == "multipart":
+                for part in mime_msg.get_payload():
+                    if part.get_content_maintype() == "text":
+                        print(BeautifulSoup(part.get_payload()).get_text())
+            elif message_main_type == "text":
+                print(BeautifulSoup(mime_msg.get_payload()).get_text())
+            print("----------------------------------------------------")
 
-            if data != 0:
-                decoded = BeautifulSoup(
-                    base64.urlsafe_b64decode(data.encode("utf-8")).decode("utf-8"),
-                    "lxml",
-                )
-                who = "From:" + str(sender)
-                subject = "Subject:" + str(subject)
-
-                for a in decoded.findAll("a"):
-                    a.extract()
-
-                decoded = decoded.getText(" ", strip=True)
-
-                # use regex to filter out strings
-                # delete ( in between )
-                result = re.sub(r"\([^)]*\)", " ", decoded)
-                # delete \n\r
-                result = re.sub(r"\s*[\r\n\xa0\u200c]+\s*", " ", result)
-                # delete media queries
-                result = re.sub(r"@media[^}]+}", " ", result)
-                # delete between {}
-                result = re.sub(r"{[^{}]*}", " ", result)
-                # delete *-
-                result = re.sub(r"[*-]", " ", result)
-
-                # message_list_append.append(who)
-                # message_list_append.append(subject)
-                # message_list_append.append("message: " + result)
-                message_list_string += who + subject + "message: " + result
-                message_list_append.append(message_list_string)
-        print(message_list_append)
+            # Message snippet only.
+            # print('Message snippet: %s' % message['snippet'])
+            print(message_list_append)
         return message_list_append
 
     except HttpError as error:
