@@ -22,7 +22,7 @@ def index() -> rx.Component:
     return rx.center(
         # rx.theme_panel(),
         rx.vstack(
-            rx.heading("Welcome to Gmail AI Organizer!", size="9"),
+            rx.heading("Welcome to Gmail AI Summarizer!", size="9"),
             rx.text("Get started by editing ", rx.code(filename)),
             login_button(),
             rx.button(
