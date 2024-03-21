@@ -33,7 +33,6 @@ def llm(data):
     text_splitter = RecursiveCharacterTextSplitter()
     documents = text_splitter.create_documents(data)
     gmail_split = text_splitter.split_documents(documents)
-    pprint(gmail_split)
 
     docs_split = text_splitter.split_documents(docs)
     vector = FAISS.from_documents(gmail_split, embeddings)
