@@ -28,7 +28,7 @@ def email():
     try:
         # Unread messages in your inbox
         query_params = {
-            "newer_than": (2, "day"),
+            "newer_than": (1, "day"),
         }
         messages = gmail.get_messages(query=construct_query(query_params))
 
