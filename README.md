@@ -1,1 +1,1 @@
-# ai_email_organizer
+# ai_email
